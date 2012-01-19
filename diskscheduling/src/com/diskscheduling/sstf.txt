@@ -1,0 +1,208 @@
+package scheduler_disk;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.xml.ws.soap.Addressing;
+
+public class SSTF_DISK extends JPanel implements ActionListener {
+	JLabel message;
+	JComboBox combo[];
+	JComboBox startingHead;
+
+	int numberOfCylinders;
+	String[] str;
+	String[] cylNum;
+	int x[];
+	int nearest=-1;
+	JButton submit;
+
+	public SSTF_DISK() 
+	{
+	
+		setLayout(new BorderLayout());
+
+		JPanel panel_top = new JPanel(new BorderLayout());
+
+		message = new JLabel("Enter cylinder number serially.");
+		panel_top.add(message, BorderLayout.CENTER);
+		add(panel_top, BorderLayout.NORTH);
+
+	
+		numberOfCylinders = Integer.parseInt(JOptionPane
+				.showInputDialog("Enter number of cylinders."));
+
+		combo = new JComboBox[numberOfCylinders];
+		startingHead = new JComboBox();
+		str = new String[500];
+
+		for (int i = 0; i < 500; i++) 
+		{
+			str[i] = String.valueOf(i);
+		}
+
+		for (int i = 0; i < numberOfCylinders; i++) 
+		{
+			combo[i] = new JComboBox(str);
+			combo[i].setEditable(true);
+
+		}
+
+		startingHead = new JComboBox(str);
+		startingHead.setEditable(true);
+
+		JLabel label[];
+		label = new JLabel[numberOfCylinders];
+
+		for (int i = 0; i < numberOfCylinders; i++) {
+			label[i] = new JLabel("cylinder " + (i + 1) + " ");
+
+		}
+
+		JPanel internalPanel = new JPanel();
+
+		submit = new JButton("SUBMIT");
+		submit.addActionListener(this);
+
+		for (int i = 0; i < numberOfCylinders; i++) {
+			internalPanel.add(label[i]);
+			internalPanel.add(combo[i]);
+		}
+
+		JLabel head_label = new JLabel("Satring head:");
+
+		internalPanel.add(head_label);
+		internalPanel.add(startingHead);
+
+		internalPanel.add(submit, BorderLayout.PAGE_END);
+
+		add(internalPanel, BorderLayout.CENTER);
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+
+		cylNum = new String[numberOfCylinders + 1];
+		x = new int[numberOfCylinders + 1];
+
+		int p;
+		
+		if (e.getSource() == submit) {
+
+			cylNum[0] = (String) startingHead.getSelectedItem();
+			x[0] = Integer.parseInt(cylNum[0]);
+
+
+			for (p = 1; p <= numberOfCylinders; p++) {
+
+				cylNum[p] = (String) combo[p - 1].getSelectedItem();
+				x[p] = Integer.parseInt(cylNum[p]);
+
+			}
+
+			
+			
+			
+			
+			//Calculate x for sstf
+			
+			int x_sstf[]=new int[numberOfCylinders + 1];
+			x_sstf[0]=x[0];
+			
+			int count;
+			int desiredNumber; 
+			
+		
+			
+			System.out.println(x_sstf[0]);
+
+			desiredNumber= x[0];
+			
+			for(count=0;count < x.length-1;count++)
+			{
+				
+				
+			    x_sstf[count+1] = findClosest(desiredNumber);
+			   
+			    
+			    System.out.println(x_sstf[count+1]);
+			    desiredNumber= nearest;
+			
+			}
+			
+			
+			
+			
+			
+			
+			
+			//Calculate y for sstf
+			
+			int j, increment = 0;
+			int[] y;
+
+			y = new int[9];
+
+			y[0] = 0;
+
+			for (j = 0; j < y.length; j++) 
+			{
+				y[j] = y[j] + increment;
+				increment = increment + 40;
+			}
+
+
+		GraphBuilder ob = new GraphBuilder(x_sstf , y);
+			JFrame frm = new JFrame();
+			frm.add(ob);
+			frm.setVisible(true);
+			frm.setSize(400, 500);
+
+		}
+ }
+
+	
+	
+	
+	
+	
+	public int findClosest( int desiredNumber)
+	{
+		
+		int bestDistanceFoundYet = 1000;
+		int d;
+		int i;
+		
+	
+		for (int k = 0; k < x.length; k++) 
+		{
+			if (nearest == x[k])
+				x[k] = 5000;
+
+		}
+		
+	
+		for ( i =1; i < x.length; i++) {        
+		         d = Math.abs(desiredNumber - x[i]);
+		            if (d < bestDistanceFoundYet) 
+		            {
+		            	bestDistanceFoundYet=d;
+		                nearest = x[i];               
+		            }
+		  }  
+		   
+		                      
+		
+
+		return nearest;
+	}
+}
